@@ -1,23 +1,32 @@
 <!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="Marvin Sernee">
-  <meta name="description" content="Een AI robot die rekenwerk kan nakijken!">
-  <meta name="keywords" content="AI, educatie, NakijkBot, nakijken, robot">
-  <title>NakijkBot</title>
-</head>
+<html>
+	<head>
+		<meta charset='utf-8'>
+		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+		<meta name="description" content="NakijkBot is een AI systeem dat rekenwerk op de basisschool nakijkt.">
+		<meta name="author" content="Marvin Sernee">
+		<meta name="keywords" content="AI, educatie, NakijkBot, nakijken, robot, CNN, Artificial Intelligence, Python, Javascript">
+		<link rel="stylesheet" type="text/css" href="style/app.css">
+		<title>NakijkBot</title>
+	</head>
 
-<body>
-  <div class="canvas--container"></div>
-  <label for="controls">
-    <button id="clear">Clear</button>
-    <button id="predict">Predict</button>
-  </label>
-  <canvas id="myChart"></canvas>
-  <div class="prediction-text"></div>
+	<body>
+		<main>
+			<section>
+				<canvas id="chalkboard"></canvas>
+				<label for="buttons">
+					<button id="clear">Clear</button>
+					<button id="predict">Predict</button>
+				</label>
+			</section>
+			
+			<section class="prediction--box">
+				<p class="prediction--text"></p>
+				<canvas id="chart"></canvas>
+			</section>
+		</main>
 
-  <script src="./js/index.js"></script>
-</body>
+		<script src="js/script.js"></script>
+	</body>
 </html>

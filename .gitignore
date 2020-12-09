@@ -120,6 +120,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# CNN trained models
+models/
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -130,3 +133,6 @@ dmypy.json
 
 # NPM modules
 node_modules/
+
+# Visual Studio Code settings
+.vscode/
