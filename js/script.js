@@ -1,13 +1,19 @@
 import 'regenerator-runtime/runtime';  // For parcel
 import * as tf from '@tensorflow/tfjs';
-import Chart from 'chart.js';
+
+// DOM elements
+const clearButton = document.getElementById('clear');
+const predictButton = document.getElementById('predict');
+const answer = document.getElementById('answer');
+let canvas = document.getElementById('canvas');
 
 // Global variables
 let model;
 
-const canvasWidth = 300;
-const canvasHeight = 300;
-const canvasStrokeStyle	= 'white';
+const canvasWidth = canvas.clientWidth;
+const canvasHeight = canvas.clientHeight;
+const canvasBackground = 'white';
+const canvasStrokeStyle	= 'grey';
 const canvasLineJoin = 'round';
 const canvasLineWidth = 10;
 
@@ -16,27 +22,13 @@ let clickY = new Array();
 let clickD = new Array();
 let drawing;
 
-// DOM elements
-const clearButton = document.getElementById('clear');
-const predictButton = document.getElementById('predict');
-
-let chalkboard = document.getElementById('chalkboard');
-
-const chartBox = document.getElementById('chart');
-const predictionText = document.querySelector('.prediction--text');
-const predictionBox = document.querySelector('.prediction--box');
-
-// Make prediction chart invisible on first load
-chartBox.innerHTML = '';
-chartBox.style.display = 'none';
-
 // Create canvas
-chalkboard.setAttribute('width', canvasWidth);
-chalkboard.setAttribute('height', canvasHeight);
+canvas.setAttribute('width', canvasWidth);
+canvas.setAttribute('height', canvasHeight);
 if(typeof G_vmlCanvasManager != 'undefined') {
-	chalkboard = G_vmlCanvasManager.initElement(chalkboard);
+	canvas = G_vmlCanvasManager.initElement(canvas);
 }
-let ctx = chalkboard.getContext('2d');
+let ctx = canvas.getContext('2d');
 
 // Load CNN-model
 const loadModel = (async () => {
@@ -54,6 +46,7 @@ const addUserGesture = (x, y, dragging) => {
 const drawOnCanvas = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
+	ctx.fillStyle = canvasBackground;
 	ctx.strokeStyle = canvasStrokeStyle;
 	ctx.lineJoin = canvasLineJoin;
 	ctx.lineWidth = canvasLineWidth;
@@ -72,8 +65,8 @@ const drawOnCanvas = () => {
 };
 
 // EventListeners on canvas
-chalkboard.addEventListener('mousedown', e => {
-	const rect = chalkboard.getBoundingClientRect();
+canvas.addEventListener('mousedown', e => {
+	const rect = canvas.getBoundingClientRect();
 	const mouseX = e.clientX - rect.left;
 	const mouseY = e.clientY - rect.top;
 	drawing = true;
@@ -81,12 +74,12 @@ chalkboard.addEventListener('mousedown', e => {
 	drawOnCanvas();
 });
 
-chalkboard.addEventListener('touchstart', (e) => {
-	if (e.target === chalkboard) {
+canvas.addEventListener('touchstart', (e) => {
+	if (e.target === canvas) {
 		e.preventDefault();
 	}
 
-	const rect = chalkboard.getBoundingClientRect();
+	const rect = canvas.getBoundingClientRect();
 	const touch = e.touches[0];
 
 	const mouseX = touch.clientX - rect.left;
@@ -98,9 +91,9 @@ chalkboard.addEventListener('touchstart', (e) => {
 
 }, false);
 
-chalkboard.addEventListener('mousemove', e => {
+canvas.addEventListener('mousemove', e => {
 	if (drawing) {
-		const rect = chalkboard.getBoundingClientRect();
+		const rect = canvas.getBoundingClientRect();
 		const mouseX = e.clientX - rect.left;
 		const mouseY = e.clientY - rect.top;
 		addUserGesture(mouseX, mouseY, true);
@@ -108,12 +101,12 @@ chalkboard.addEventListener('mousemove', e => {
 	}
 });
 
-chalkboard.addEventListener('touchmove', (e) => {
-	if (e.target === chalkboard) {
+canvas.addEventListener('touchmove', (e) => {
+	if (e.target === canvas) {
 		e.preventDefault();
 	}
 	if(drawing) {
-		const rect = chalkboard.getBoundingClientRect();
+		const rect = canvas.getBoundingClientRect();
 		const touch = e.touches[0];
 
 		const mouseX = touch.clientX - rect.left;
@@ -124,46 +117,44 @@ chalkboard.addEventListener('touchmove', (e) => {
 	}
 }, false);
 
-chalkboard.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseup', () => drawing = false);
 
-chalkboard.addEventListener('touchend', (e) => {
-	if (e.target === chalkboard) {
+canvas.addEventListener('touchend', (e) => {
+	if (e.target === canvas) {
 		e.preventDefault();
 	}
 	drawing = false;
 }, false);
 
-chalkboard.addEventListener('mouseleave', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
 
-chalkboard.addEventListener('touchleave', (e) => {
-	if (e.target === chalkboard) {
+canvas.addEventListener('touchleave', (e) => {
+	if (e.target === canvas) {
 		e.preventDefault();
 	}
 	drawing = false;
 }, false);
 
 // EventListeners on buttons
-clearButton.addEventListener('click', async () => {
-	ctx = chalkboard.getContext('2d');
+clearButton.addEventListener('click', async (e) => {
+	e.preventDefault();
+	ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
 	clickX = new Array();
 	clickY = new Array();
 	clickD = new Array();
 
-	predictionText.innerHTML = '';
-	predictionBox.style.display = 'none';
+	answer.innerHTML = '';
 });
 
-predictButton.addEventListener('click', async () => {
-	let tensor = preprocessCanvas(chalkboard);
+predictButton.addEventListener('click', async (e) => {
+	e.preventDefault();
+	let tensor = preprocessCanvas(canvas);
 	let predictions = await model.predict(tensor).data();
 	let results = Array.from(predictions);
-
-	predictionBox.style.display = 'block';
 	
-	displayChart(results);
-	displayLabel(results);
+	displayNumber(results);
 });
 
 const preprocessCanvas = image => {
@@ -176,40 +167,7 @@ const preprocessCanvas = image => {
 	return tensor.div(255.0);
 };
 
-let chart = '';
-let firstTime = 0;
-const loadChart = (label, data, modelSelected) => {
-	ctx = document.getElementById('chart').getContext('2d');
-	chart = new Chart(ctx, {
-		type: 'bar',
-		data: {
-			labels: label,
-			datasets: [{
-				label: modelSelected + ' prediction',
-				backgroundColor: '#f50057',
-				borderColor: 'rgb(255, 99, 132)',
-				data: data,
-			}]
-		},
-		options: {}
-	});
-};
-
-const displayChart = data => {
-	const select_option = 'CNN';
-
-	const label = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-	if (firstTime === 0) {
-		loadChart(label, data, select_option);
-		firstTime = 1;
-	} else {
-		chart.destroy();
-		loadChart(label, data, select_option);
-	}
-	document.getElementById('chart').style.display = 'block';
-};
-
-const displayLabel = data => {
+const displayNumber = data => {
 	let max = data[0];
 	let maxIndex = 0;
 
@@ -219,5 +177,6 @@ const displayLabel = data => {
 			max = data[i];
 		}
 	}
-	predictionText.innerHTML = `Predicting you draw <b>${maxIndex}</b> with <b>${Math.trunc(max * 100)}%</b> confidence`;
+	console.log(`Predicting you draw ${maxIndex} with ${Math.trunc(max * 100)}% confidence`);
+	answer.innerHTML = `${maxIndex}`;
 };

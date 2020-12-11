@@ -13,18 +13,18 @@
 
 	<body>
 		<main>
-			<section>
-				<canvas id="chalkboard"></canvas>
-				<label for="buttons">
-					<button id="clear">Clear</button>
-					<button id="predict">Predict</button>
-				</label>
+			<section class="chalkboard">
+				<h1 class="chalkboard--sum">3 + 3 = <span id="answer"></span></h1>
+			</section>
+
+			<section class="canvas-container">
+				<canvas id="canvas" class="canvas__paper"></canvas>
 			</section>
 			
-			<section class="prediction--box">
-				<p class="prediction--text"></p>
-				<canvas id="chart"></canvas>
-			</section>
+			<form>
+				<button id="clear">Clear</button>
+				<button id="predict">Predict</button>
+			</form>
 		</main>
 
 		<script src="js/script.js"></script>
