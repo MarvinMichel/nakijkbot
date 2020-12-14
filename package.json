@@ -2,10 +2,9 @@
   "name": "nakijkbot",
   "version": "1.0.0",
   "description": "Een AI robot die rekenwerk nakijkt voor basisschool leerkrachten.",
-  "main": "App.js",
+  "main": "script.js",
   "dependencies": {
-    "@tensorflow/tfjs": "^2.7.0",
-    "chart.js": "^2.9.4"
+    "@tensorflow/tfjs": "^2.7.0"
   },
   "devDependencies": {
     "eslint": "^7.15.0",
@@ -21,11 +20,14 @@
   },
   "keywords": [
     "AI",
-    "nakijken",
-    "educatie",
-    "NakijkBot",
-    "CNN",
     "Artificial Intelligence",
+    "CNN",
+    "NakijkBot",
+    "nakijken",
+    "rekenwerk",
+    "rekenen",
+    "basisschool",
+    "educatie",
     "Python",
     "Javascript"
   ],
