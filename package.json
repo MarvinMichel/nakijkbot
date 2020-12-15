@@ -1,0 +1,40 @@
+{
+  "name": "nakijkbot",
+  "version": "1.0.0",
+  "description": "Een AI robot die rekenwerk nakijkt voor basisschool leerkrachten.",
+  "main": "script.js",
+  "dependencies": {
+    "@tensorflow/tfjs": "^2.7.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.15.0",
+    "parcel-bundler": "^1.12.4"
+  },
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarvinMichel/nakijkbot.git"
+  },
+  "keywords": [
+    "AI",
+    "Artificial Intelligence",
+    "CNN",
+    "NakijkBot",
+    "nakijken",
+    "rekenwerk",
+    "rekenen",
+    "basisschool",
+    "educatie",
+    "Python",
+    "Javascript"
+  ],
+  "author": "Marvin Sernee",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MarvinMichel/nakijkbot/issues"
+  },
+  "homepage": "https://github.com/MarvinMichel/nakijkbot#readme"
+}

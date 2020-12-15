@@ -1,0 +1,37 @@
+html {
+  background-color: rgb(159, 214, 202);
+}
+
+.chalkboard {
+  align-items: center;
+  background: url("../images/chalkboard.svg") center / contain no-repeat;
+  display: flex;
+  height: 50vh;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.chalkboard h1 {
+  font-size: clamp(5em, 10vh, 8em);
+  color: white;
+}
+
+.canvas-container {
+  height: clamp(20rem, 50vh, 35rem);
+  left: 50%;
+  position: absolute;
+  top: 70%;
+  transform: translate(-50%, -50%);
+  width: clamp(20rem, 50vh, 35rem);
+}
+
+.canvas__paper {
+  background: url("../images/canvas.svg") center / cover no-repeat;
+  cursor: url("../images/pencil_cursor.svg") 0 25, auto;
+  height: 100%;
+  width: 100%;
+}
+
+.prediction--box {
+  max-width: 20rem;
+}
