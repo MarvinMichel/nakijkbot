@@ -1,5 +1,5 @@
 html {
-  background-color: rgb(130, 171, 164);
+  background-color: rgb(159, 214, 202);
 }
 
 .chalkboard {
@@ -9,7 +9,6 @@ html {
   height: 50vh;
   justify-content: center;
   margin: 0 auto;
-  width: 70vw;
 }
 
 .chalkboard h1 {
@@ -18,15 +17,19 @@ html {
 }
 
 .canvas-container {
+  height: clamp(20rem, 50vh, 35rem);
   left: 50%;
   position: absolute;
   top: 70%;
   transform: translate(-50%, -50%);
+  width: clamp(20rem, 50vh, 35rem);
 }
 
 .canvas__paper {
   background: url("../images/canvas.svg") center / cover no-repeat;
-  height: 60vh;
+  cursor: url("../images/pencil_cursor.svg") 0 25, auto;
+  height: 100%;
+  width: 100%;
 }
 
 .prediction--box {

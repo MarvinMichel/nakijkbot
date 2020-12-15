@@ -1,13 +1,14 @@
 import 'regenerator-runtime/runtime';  // For parcel
 import * as tf from '@tensorflow/tfjs';
 
-// DOM elements
+/***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
 const predictButton = document.getElementById('predict');
 const answer = document.getElementById('answer');
-let canvas = document.getElementById('canvas');
+const sum = document.querySelector('.chalkboard--sum');
+let canvas = document.querySelector('.canvas__paper');
 
-// Global variables
+/**************************** Global Variables ***********************************/
 let model;
 
 const canvasWidth = canvas.clientWidth;
@@ -30,13 +31,34 @@ if(typeof G_vmlCanvasManager != 'undefined') {
 }
 let ctx = canvas.getContext('2d');
 
+// Clear canvas
+const clearCanvas = () => {
+	ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+	clickX = new Array();
+	clickY = new Array();
+	clickD = new Array();
+};
+
 // Load CNN-model
 const loadModel = (async () => {
 	model = undefined;
 	model = await tf.loadLayersModel('models/model.json');
 })();
 
-// Drawing functions
+// Create grayscale image of drawing
+const preprocessCanvas = image => {
+	let tensor = tf.browser.fromPixels(image)
+		.resizeNearestNeighbor([28, 28])
+		.mean(2)
+		.expandDims(2)
+		.expandDims()
+		.toFloat();
+	return tensor.div(255.0);
+};
+
+/**************************** Drawing functions **********************************/
 const addUserGesture = (x, y, dragging) => {
 	clickX.push(x);
 	clickY.push(y);
@@ -64,7 +86,7 @@ const drawOnCanvas = () => {
 	}
 };
 
-// EventListeners on canvas
+/************************** Event Listeners on canvas ***************************/
 canvas.addEventListener('mousedown', e => {
 	const rect = canvas.getBoundingClientRect();
 	const mouseX = e.clientX - rect.left;
@@ -134,18 +156,16 @@ canvas.addEventListener('touchleave', (e) => {
 	}
 	drawing = false;
 }, false);
+/*********************************************************************************/
 
-// EventListeners on buttons
+/************************** Event Listeners on buttons ***************************/
 clearButton.addEventListener('click', async (e) => {
 	e.preventDefault();
-	ctx = canvas.getContext('2d');
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-	clickX = new Array();
-	clickY = new Array();
-	clickD = new Array();
-
-	answer.innerHTML = '';
+	clearCanvas();
+	
+	const answers = sum.querySelectorAll('span');
+	const lastAnswer = answers[answers.length - 1];
+	sum.removeChild(lastAnswer);
 });
 
 predictButton.addEventListener('click', async (e) => {
@@ -155,18 +175,11 @@ predictButton.addEventListener('click', async (e) => {
 	let results = Array.from(predictions);
 	
 	displayNumber(results);
+	clearCanvas();
 });
 
-const preprocessCanvas = image => {
-	let tensor = tf.browser.fromPixels(image)
-		.resizeNearestNeighbor([28, 28])
-		.mean(2)
-		.expandDims(2)
-		.expandDims()
-		.toFloat();
-	return tensor.div(255.0);
-};
-
+/****************************** Math functions ***********************************/
+// Show written number prediciton on chalkboard
 const displayNumber = data => {
 	let max = data[0];
 	let maxIndex = 0;
@@ -177,6 +190,33 @@ const displayNumber = data => {
 			max = data[i];
 		}
 	}
-	console.log(`Predicting you draw ${maxIndex} with ${Math.trunc(max * 100)}% confidence`);
-	answer.innerHTML = `${maxIndex}`;
+
+	const number = document.createElement('span');
+	number.innerHTML = maxIndex;
+	sum.appendChild(number);
+
+	// answer.innerHTML = `${maxIndex}`;
+};
+
+// Get random number between 0 and 9
+const getRandomInt = (min, max) => {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min) + min);
+};
+
+// Return a random math excercise on chalkboard
+const getMathExcercise = (() => {
+	const num1 = getRandomInt(0, 10);
+	const num2 = getRandomInt(0, 10);
+	sum.innerHTML = `${num1} + ${num2} = `;
+})();
+
+// Check if given answer is (in)correct
+const checkAnswer = (num1, num2, answer) => {
+	if (num1 + num2 === answer) {
+		// notify correct
+	} else {
+		// notify incorrect
+	}
 };
