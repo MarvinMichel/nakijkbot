@@ -10,7 +10,11 @@
     "eslint": "^7.15.0",
     "parcel-bundler": "^1.12.4"
   },
+  "resolutions": {
+    "node-forge": "^0.10.0"
+  },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "dev": "parcel index.html",
     "build": "parcel build index.html"
   },
