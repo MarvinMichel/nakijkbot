@@ -4,7 +4,6 @@ import * as tf from '@tensorflow/tfjs';
 /***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
 const predictButton = document.getElementById('predict');
-const answer = document.getElementById('answer');
 const sum = document.querySelector('.chalkboard--sum');
 let canvas = document.querySelector('.canvas__paper');
 
@@ -47,7 +46,7 @@ const loadModel = (async () => {
 	model = await tf.loadLayersModel('models/model.json');
 })();
 
-// Create grayscale image of drawing
+// Preprocess canvas input into visual pattern
 const preprocessCanvas = image => {
 	let tensor = tf.browser.fromPixels(image)
 		.resizeNearestNeighbor([28, 28])
@@ -156,7 +155,6 @@ canvas.addEventListener('touchleave', (e) => {
 	}
 	drawing = false;
 }, false);
-/*********************************************************************************/
 
 /************************** Event Listeners on buttons ***************************/
 clearButton.addEventListener('click', async (e) => {
