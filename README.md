@@ -1,5 +1,5 @@
 # NakijkBot
-An application to grade and control math tests for primary school students. A Artificial Intelligence bot that recognizes hand written numbers and translates them to digital numbers will check the answers and will give the student a grade based on the number of right answers given.
+An application to grade and control math tests for primary school students. An Artificial Intelligence bot that recognizes hand written numbers and translates them to digital numbers will check the answers and will give the student a grade based on the number of right answers given.
 
 ## How to use
 1. To use the application, download the zip-file or clone the repository
