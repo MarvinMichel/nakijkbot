@@ -17,21 +17,35 @@ html {
 }
 
 .canvas-container {
+  display: flex;
   height: clamp(20rem, 50vh, 35rem);
   left: 50%;
   position: absolute;
   top: 70%;
   transform: translate(-50%, -50%);
-  width: clamp(20rem, 50vh, 35rem);
 }
 
-.canvas__paper {
+.canvas--paper {
+  --size: clamp(20rem, 50vh, 35rem);
   background: url("../images/canvas.svg") center / cover no-repeat;
   cursor: url("../images/pencil_cursor.svg") 0 25, auto;
-  height: 100%;
-  width: 100%;
+  height: var(--size);
+  width: var(--size);
 }
 
-.prediction--box {
-  max-width: 20rem;
+.canvas--controls {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 50%;
+  justify-content: space-evenly;
+  margin: auto;
+}
+
+.canvas--controls__button {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
 }

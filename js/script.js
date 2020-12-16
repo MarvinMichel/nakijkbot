@@ -3,9 +3,11 @@ import * as tf from '@tensorflow/tfjs';
 
 /***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
-const predictButton = document.getElementById('predict');
+const fillButton = document.getElementById('fill');
+const checkButton = document.getElementById('check');
 const sum = document.querySelector('.chalkboard--sum');
-let canvas = document.querySelector('.canvas__paper');
+let num1, num2 = 0;
+let canvas = document.querySelector('.canvas--paper');
 
 /**************************** Global Variables ***********************************/
 let model;
@@ -161,12 +163,15 @@ clearButton.addEventListener('click', async (e) => {
 	e.preventDefault();
 	clearCanvas();
 	
-	const answers = sum.querySelectorAll('span');
-	const lastAnswer = answers[answers.length - 1];
-	sum.removeChild(lastAnswer);
+	if (sum.childNodes.length > 1) {
+		const answer = sum.querySelector('span').innerHTML;
+		const numbers = Array.from(answer.toString()).map(Number);
+		numbers.pop();
+		sum.querySelector('span').innerHTML = [...numbers];
+	}
 });
 
-predictButton.addEventListener('click', async (e) => {
+fillButton.addEventListener('click', async (e) => {
 	e.preventDefault();
 	let tensor = preprocessCanvas(canvas);
 	let predictions = await model.predict(tensor).data();
@@ -174,6 +179,12 @@ predictButton.addEventListener('click', async (e) => {
 	
 	displayNumber(results);
 	clearCanvas();
+});
+
+checkButton.addEventListener('click', (e) => {
+	e.preventDefault();
+	const answer = Number(sum.querySelector('span').innerHTML);
+	checkAnswer(answer);
 });
 
 /****************************** Math functions ***********************************/
@@ -189,11 +200,13 @@ const displayNumber = data => {
 		}
 	}
 
-	const number = document.createElement('span');
-	number.innerHTML = maxIndex;
-	sum.appendChild(number);
-
-	// answer.innerHTML = `${maxIndex}`;
+	if (sum.childNodes.length > 1) {
+		sum.childNodes[1].innerHTML += maxIndex;
+	} else {
+		const number = document.createElement('span');
+		sum.appendChild(number);
+		number.innerHTML = maxIndex;
+	}
 };
 
 // Get random number between 0 and 9
@@ -205,16 +218,16 @@ const getRandomInt = (min, max) => {
 
 // Return a random math excercise on chalkboard
 const getMathExcercise = (() => {
-	const num1 = getRandomInt(0, 10);
-	const num2 = getRandomInt(0, 10);
+	num1 = getRandomInt(0, 10);
+	num2 = getRandomInt(0, 10);
 	sum.innerHTML = `${num1} + ${num2} = `;
 })();
 
 // Check if given answer is (in)correct
-const checkAnswer = (num1, num2, answer) => {
-	if (num1 + num2 === answer) {
-		// notify correct
+const checkAnswer = (answer) => {
+	if (Number(num1 + num2) === answer) {
+		console.log(`Correct! ${num1 + num2} is the same as ${answer}`);
 	} else {
-		// notify incorrect
+		console.log(`Sorry buddy! But ${num1 + num2} is not the same as ${answer}`);
 	}
 };
