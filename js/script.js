@@ -59,7 +59,7 @@ const preprocessCanvas = image => {
 	return tensor.div(255.0);
 };
 
-/**************************** Drawing functions **********************************/
+/**************************** Canvas functions **********************************/
 const addUserGesture = (x, y, dragging) => {
 	clickX.push(x);
 	clickY.push(y);
@@ -85,6 +85,16 @@ const drawOnCanvas = () => {
 		ctx.closePath();
 		ctx.stroke();
 	}
+};
+
+const isCanvasBlank = canvas => {
+	const context = canvas.getContext('2d');
+
+	const pixelBuffer = new Uint32Array(
+		context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+	);
+
+	return !pixelBuffer.some(color => color !== 0);
 };
 
 /************************** Event Listeners on canvas ***************************/
@@ -199,6 +209,8 @@ const displayNumber = data => {
 			max = data[i];
 		}
 	}
+
+	if (isCanvasBlank(canvas)) return;
 
 	if (sum.childNodes.length > 1) {
 		sum.childNodes[1].innerHTML += maxIndex;
