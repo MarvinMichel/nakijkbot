@@ -1,12 +1,12 @@
 import 'regenerator-runtime/runtime';  // For parcel
 import * as tf from '@tensorflow/tfjs';
+import MathQuiz from './mathquiz';
 
 /***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
 const fillButton = document.getElementById('fill');
 const checkButton = document.getElementById('check');
 const sum = document.querySelector('.chalkboard--sum');
-let num1, num2 = 0;
 let canvas = document.querySelector('.canvas--paper');
 
 /**************************** Global Variables ***********************************/
@@ -24,6 +24,9 @@ let clickY = new Array();
 let clickD = new Array();
 let drawing;
 
+let quiz = new MathQuiz();
+
+/**************************** Canvas functions **********************************/
 // Create canvas
 canvas.setAttribute('width', canvasWidth);
 canvas.setAttribute('height', canvasHeight);
@@ -32,7 +35,6 @@ if(typeof G_vmlCanvasManager != 'undefined') {
 }
 let ctx = canvas.getContext('2d');
 
-// Clear canvas
 const clearCanvas = () => {
 	ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -42,7 +44,7 @@ const clearCanvas = () => {
 	clickD = new Array();
 };
 
-// Load CNN-model
+// Load CNN-model, self-invoking function
 const loadModel = (async () => {
 	model = undefined;
 	model = await tf.loadLayersModel('models/model.json');
@@ -59,7 +61,6 @@ const preprocessCanvas = image => {
 	return tensor.div(255.0);
 };
 
-/**************************** Canvas functions **********************************/
 const addUserGesture = (x, y, dragging) => {
 	clickX.push(x);
 	clickY.push(y);
@@ -179,6 +180,8 @@ clearButton.addEventListener('click', async (e) => {
 		numbers.pop();
 		sum.querySelector('span').innerHTML = [...numbers];
 	}
+
+	quiz.changeUserAnswer(sum.childNodes[1]);
 });
 
 fillButton.addEventListener('click', async (e) => {
@@ -187,19 +190,21 @@ fillButton.addEventListener('click', async (e) => {
 	let predictions = await model.predict(tensor).data();
 	let results = Array.from(predictions);
 	
-	displayNumber(results);
+	displayAnswer(results);
 	clearCanvas();
+
+	quiz.changeUserAnswer(sum.childNodes[1]);
 });
 
 checkButton.addEventListener('click', (e) => {
 	e.preventDefault();
-	const answer = Number(sum.querySelector('span').innerHTML);
-	checkAnswer(answer);
+	quiz.checkAnswer();
 });
 
 /****************************** Math functions ***********************************/
 // Show written number prediciton on chalkboard
-const displayNumber = data => {
+const displayAnswer = data => {
+	// Predict written number
 	let max = data[0];
 	let maxIndex = 0;
 
@@ -209,9 +214,9 @@ const displayNumber = data => {
 			max = data[i];
 		}
 	}
-
+	// Check if canvas isn't blank
 	if (isCanvasBlank(canvas)) return;
-
+	// Display answer on chalkboard
 	if (sum.childNodes.length > 1) {
 		sum.childNodes[1].innerHTML += maxIndex;
 	} else {
@@ -221,25 +226,14 @@ const displayNumber = data => {
 	}
 };
 
-// Get random number between 0 and 9
-const getRandomInt = (min, max) => {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min) + min);
-};
-
-// Return a random math excercise on chalkboard
-const getMathExcercise = (() => {
-	num1 = getRandomInt(0, 10);
-	num2 = getRandomInt(0, 10);
-	sum.innerHTML = `${num1} + ${num2} = `;
+// Self-invoked on pageload
+const renderQuiz = (() => {
+	for (let i = 1; i < 25; i++) {
+		quiz.getMathExcercise(i);
+	}
+	quiz.getQuestion(0, sum);
 })();
 
-// Check if given answer is (in)correct
-const checkAnswer = (answer) => {
-	if (Number(num1 + num2) === answer) {
-		console.log(`Correct! ${num1 + num2} is the same as ${answer}`);
-	} else {
-		console.log(`Sorry buddy! But ${num1 + num2} is not the same as ${answer}`);
-	}
-};
+// const fillInAnswer = () => {
+// 	localStorage.setItem('quiz', JSON.stringify(quiz));
+// };

@@ -18,8 +18,11 @@ html {
 }
 
 .chalkboard h1 {
-  font-size: clamp(5em, 10vh, 8em);
   color: white;
+  font-family: chalky, sans-serif;
+  font-size: clamp(5em, 15vh, 8em);
+  font-style: normal;
+  font-weight: 400;
 }
 
 .chalkboard--controls {
