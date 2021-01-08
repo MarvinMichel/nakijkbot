@@ -17,7 +17,7 @@ html {
   width: var(--size);
 }
 
-.chalkboard h1 {
+.chalkboard--sum {
   color: white;
   font-family: chalky, sans-serif;
   font-size: clamp(5em, 15vh, 8em);
