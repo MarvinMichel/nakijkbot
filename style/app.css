@@ -58,6 +58,7 @@ html {
   position: absolute;
   top: 70%;
   transform: translate(-50%, -50%);
+  z-index: 99;
 }
 
 .canvas--paper {
@@ -66,6 +67,29 @@ html {
   cursor: url("../images/pencil_cursor.svg") 0 25, auto;
   height: var(--size);
   width: var(--size);
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 95vw;
+}
+
+.navigation--button {
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navigation--button:disabled svg {
+  opacity: .4;
 }
 
 @media screen and (min-height: 1000px) {

@@ -5,6 +5,8 @@ import MathQuiz from './mathquiz';
 /***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
 const fillButton = document.getElementById('fill');
+const prevButton = document.getElementById('prev');
+const nextButton = document.getElementById('next');
 const checkButton = document.getElementById('check');
 const sum = document.querySelector('.chalkboard--sum');
 let canvas = document.querySelector('.canvas--paper');
@@ -23,6 +25,9 @@ let clickX = new Array();
 let clickY = new Array();
 let clickD = new Array();
 let drawing;
+
+let index = 0;
+const numberOfQuestion = 10;
 
 let quiz = new MathQuiz();
 
@@ -196,10 +201,26 @@ fillButton.addEventListener('click', async (e) => {
 	quiz.changeUserAnswer(sum.childNodes[1]);
 });
 
-checkButton.addEventListener('click', (e) => {
+nextButton.addEventListener('click', e => {
 	e.preventDefault();
-	quiz.checkAnswer();
+	if (index === 0) prevButton.removeAttribute('disabled');
+	index++;
+	if (index === (numberOfQuestion - 1)) nextButton.setAttribute('disabled', 'true');
+	quiz.getQuestion(index, sum);
 });
+
+prevButton.addEventListener('click', e => {
+	e.preventDefault();
+	if (index === numberOfQuestion - 1) nextButton.removeAttribute('disabled');
+	index--;
+	if (index === 0) prevButton.setAttribute('disabled', 'true');
+	quiz.getQuestion(index, sum);
+});
+
+// checkButton.addEventListener('click', (e) => {
+// 	e.preventDefault();
+// 	quiz.checkAnswer();
+// });
 
 /****************************** Math functions ***********************************/
 // Show written number prediciton on chalkboard
@@ -228,10 +249,10 @@ const displayAnswer = data => {
 
 // Self-invoked on pageload
 const renderQuiz = (() => {
-	for (let i = 1; i < 25; i++) {
+	for (let i = 1; i <= numberOfQuestion; i++) {
 		quiz.getMathExcercise(i);
 	}
-	quiz.getQuestion(0, sum);
+	quiz.getQuestion(index, sum);
 })();
 
 // const fillInAnswer = () => {
