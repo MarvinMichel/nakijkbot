@@ -22,17 +22,17 @@ class MathQuiz {
 		this.questions.push(question);
 	}
 
-	getQuestion(index, element) {
-		this.currentQuestion = this.questions[index];
-		element.innerHTML = `${this.currentQuestion.sum} = `;
+	getQuestion(index, question, answer) {
+		question.innerHTML = `${this.questions[index].sum} = `;
+		if (this.questions[index].userAnswer) {
+			answer.innerHTML = this.questions[index].userAnswer;
+		} else {
+			answer.innerHTML = '';
+		}
 	}
 
-	changeUserAnswer(element) {
-		let userAnswer;
-		element.innerHTML === ''
-			? userAnswer = undefined
-			: userAnswer = Number(element.innerHTML);
-		this.currentQuestion.userAnswer = userAnswer;
+	changeUserAnswer(index, element) {
+		this.questions[index].userAnswer = element.innerText;
 	}
 
 	checkAnswer() {

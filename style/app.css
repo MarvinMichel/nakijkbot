@@ -15,14 +15,28 @@ html {
   margin: 0 auto;
   position: relative;
   width: var(--size);
+  z-index: 98;
 }
 
-.chalkboard--sum {
+.chalkboard--index,
+.chalkboard--sum,
+.chalkboard--answer {
   color: white;
   font-family: chalky, sans-serif;
-  font-size: clamp(5em, 15vh, 8em);
   font-style: normal;
   font-weight: 400;
+}
+
+.chalkboard--sum,
+.chalkboard--answer {
+  font-size: clamp(5em, 15vh, 8em);
+}
+
+.chalkboard--index {
+  font-size: clamp(2em, 5%, 3em);
+  left: 5%;
+  position: absolute;
+  top: 5%;
 }
 
 .chalkboard--controls {
@@ -89,6 +103,10 @@ html {
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.navigation--button svg {
+  width: 3rem;
 }
 
 .navigation--button:disabled svg {

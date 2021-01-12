@@ -7,8 +7,9 @@ const clearButton = document.getElementById('clear');
 const fillButton = document.getElementById('fill');
 const prevButton = document.getElementById('prev');
 const nextButton = document.getElementById('next');
-const checkButton = document.getElementById('check');
+const indexBox = document.querySelector('.chalkboard--index');
 const sum = document.querySelector('.chalkboard--sum');
+const answerBox = document.querySelector('.chalkboard--answer');
 let canvas = document.querySelector('.canvas--paper');
 
 /**************************** Global Variables ***********************************/
@@ -179,26 +180,20 @@ clearButton.addEventListener('click', async (e) => {
 	e.preventDefault();
 	clearCanvas();
 	
-	if (sum.childNodes.length > 1) {
-		const answer = sum.querySelector('span').innerHTML;
-		const numbers = Array.from(answer.toString()).map(Number);
-		numbers.pop();
-		sum.querySelector('span').innerHTML = [...numbers];
-	}
+	const answer = answerBox.innerHTML;
+	const numbers = Array.from(answer.toString()).map(Number);
+	numbers.pop();
+	answerBox.innerHTML = [...numbers];
 
-	quiz.changeUserAnswer(sum.childNodes[1]);
+	quiz.changeUserAnswer(index, answerBox);
 });
 
 fillButton.addEventListener('click', async (e) => {
 	e.preventDefault();
-	let tensor = preprocessCanvas(canvas);
-	let predictions = await model.predict(tensor).data();
-	let results = Array.from(predictions);
-	
-	displayAnswer(results);
+	const predictedNumber = await predictNumber();
+	await displayAnswer(predictedNumber);
+	quiz.changeUserAnswer(index, answerBox);
 	clearCanvas();
-
-	quiz.changeUserAnswer(sum.childNodes[1]);
 });
 
 nextButton.addEventListener('click', e => {
@@ -206,45 +201,42 @@ nextButton.addEventListener('click', e => {
 	if (index === 0) prevButton.removeAttribute('disabled');
 	index++;
 	if (index === (numberOfQuestion - 1)) nextButton.setAttribute('disabled', 'true');
-	quiz.getQuestion(index, sum);
+	indexBox.innerHTML = `${index+1}/${numberOfQuestion}`;
+	quiz.getQuestion(index, sum, answerBox);
 });
 
 prevButton.addEventListener('click', e => {
 	e.preventDefault();
+	quiz.currentQuestion;
 	if (index === numberOfQuestion - 1) nextButton.removeAttribute('disabled');
 	index--;
 	if (index === 0) prevButton.setAttribute('disabled', 'true');
-	quiz.getQuestion(index, sum);
+	indexBox.innerHTML = `${index+1}/${numberOfQuestion}`;
+	quiz.getQuestion(index, sum, answerBox);
 });
-
-// checkButton.addEventListener('click', (e) => {
-// 	e.preventDefault();
-// 	quiz.checkAnswer();
-// });
 
 /****************************** Math functions ***********************************/
 // Show written number prediciton on chalkboard
-const displayAnswer = data => {
-	// Predict written number
-	let max = data[0];
+const displayAnswer = async(answer) => {
+	if (isCanvasBlank(canvas)) return;
+	answerBox.innerHTML += answer;
+};
+
+const predictNumber = async() => {
+	let tensor = preprocessCanvas(canvas);
+	let predictions = await model.predict(tensor).data();
+	let results = Array.from(predictions);
+
+	let max = results[0];
 	let maxIndex = 0;
 
-	for (let i = 1; i < data.length; i++) {
-		if (data[i] > max) {
+	for (let i = 1; i < results.length; i++) {
+		if (results[i] > max) {
 			maxIndex = i;
-			max = data[i];
+			max = results[i];
 		}
 	}
-	// Check if canvas isn't blank
-	if (isCanvasBlank(canvas)) return;
-	// Display answer on chalkboard
-	if (sum.childNodes.length > 1) {
-		sum.childNodes[1].innerHTML += maxIndex;
-	} else {
-		const number = document.createElement('span');
-		sum.appendChild(number);
-		number.innerHTML = maxIndex;
-	}
+	return maxIndex;
 };
 
 // Self-invoked on pageload
@@ -252,9 +244,6 @@ const renderQuiz = (() => {
 	for (let i = 1; i <= numberOfQuestion; i++) {
 		quiz.getMathExcercise(i);
 	}
-	quiz.getQuestion(index, sum);
+	indexBox.innerHTML = `${index+1}/${numberOfQuestion}`;
+	quiz.getQuestion(index, sum, answerBox);
 })();
-
-// const fillInAnswer = () => {
-// 	localStorage.setItem('quiz', JSON.stringify(quiz));
-// };
