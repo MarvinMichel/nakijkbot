@@ -5,20 +5,19 @@
 		<meta http-equiv='X-UA-Compatible' content='IE=edge'>
 		<meta name='viewport' content='width=device-width, initial-scale=1'>
 		<meta name="author" content="Marvin Sernee">
-		<meta 
-			name="description" 
-			content="NakijkBot is een AI systeem dat rekenwerk op de basisschool nakijkt.">
-		<meta 
-			name="keywords" 
-			content="AI, educatie, NakijkBot, nakijken, robot, CNN, Artificial Intelligence, Python, Javascript">
-		<link rel="stylesheet" type="text/css" href="style/app.css">
+		<meta name="description" content="NakijkBot is een AI systeem dat rekenwerk op de basisschool nakijkt.">
+		<meta name="keywords" content="AI, educatie, NakijkBot, nakijken, robot, CNN, Artificial Intelligence, Python, Javascript">
+		<link rel="stylesheet" href="https://use.typekit.net/jyh8etu.css">
+		<link rel="stylesheet" type="text/css" href="css/app.css">
 		<title>NakijkBot</title>
 	</head>
 
 	<body>
 		<main>
 			<section class="chalkboard">
+				<h2 class="chalkboard--index"></h2>
 				<h1 class="chalkboard--sum"></h1>
+				<h1 class="chalkboard--answer"></h1>
 				<div class="chalkboard--controls">
 					<button class="chalkboard--controls__button" id="clear">
 						Clear						
@@ -34,8 +33,21 @@
 			<section class="canvas-container">
 				<canvas class="canvas--paper"></canvas>
 			</section>
-			
-			<button id="check">Check answer</button>
+
+			<form class="navigation">
+				<button class="navigation--button" id="prev" disabled>
+					<svg viewBox="0 0 52.519 85.05">
+						<path d="M55.41,9,65.4,18.993,32.943,51.525,65.4,84.057,55.41,94.05,12.885,51.525Z" transform="translate(-12.885 -9)"/>
+					</svg>					
+				</button>
+				<button class="navigation--button" id="next">
+					<svg viewBox="0 0 52.519 85.05">
+						<path d="M22.878,9l-9.993,9.993L45.346,51.525,12.885,84.057l9.993,9.993L65.4,51.525Z" transform="translate(-12.885 -9)"/>
+					</svg>					
+				</button>
+			</form>
+
+			<button class="done-button" id="done">Inleveren</button>
 		</main>
 
 		<script src="js/script.js"></script>

@@ -1,12 +1,18 @@
 import 'regenerator-runtime/runtime';  // For parcel
 import * as tf from '@tensorflow/tfjs';
+import MathQuiz from './mathquiz';
 
 /***************************** DOM elements **************************************/
 const clearButton = document.getElementById('clear');
 const fillButton = document.getElementById('fill');
-const checkButton = document.getElementById('check');
+const prevButton = document.getElementById('prev');
+const nextButton = document.getElementById('next');
+const doneButton = document.getElementById('done');
+
+const indexBox = document.querySelector('.chalkboard--index');
 const sum = document.querySelector('.chalkboard--sum');
-let num1, num2 = 0;
+const answerBox = document.querySelector('.chalkboard--answer');
+
 let canvas = document.querySelector('.canvas--paper');
 
 /**************************** Global Variables ***********************************/
@@ -24,6 +30,13 @@ let clickY = new Array();
 let clickD = new Array();
 let drawing;
 
+let index = 0;
+const numberOfQuestion = 3;
+
+/************************** Initiate Application *********************************/
+// Create quiz
+let quiz = new MathQuiz();
+
 // Create canvas
 canvas.setAttribute('width', canvasWidth);
 canvas.setAttribute('height', canvasHeight);
@@ -32,17 +45,7 @@ if(typeof G_vmlCanvasManager != 'undefined') {
 }
 let ctx = canvas.getContext('2d');
 
-// Clear canvas
-const clearCanvas = () => {
-	ctx = canvas.getContext('2d');
-	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-	clickX = new Array();
-	clickY = new Array();
-	clickD = new Array();
-};
-
-// Load CNN-model
+// Load CNN-model, self-invoking function
 const loadModel = (async () => {
 	model = undefined;
 	model = await tf.loadLayersModel('models/model.json');
@@ -59,7 +62,39 @@ const preprocessCanvas = image => {
 	return tensor.div(255.0);
 };
 
+// Predict wirtten number
+const predictNumber = async() => {
+	let tensor = preprocessCanvas(canvas);
+	let predictions = await model.predict(tensor).data();
+	let results = Array.from(predictions);
+
+	let max = results[0];
+	let maxIndex = 0;
+
+	for (let i = 1; i < results.length; i++) {
+		if (results[i] > max) {
+			maxIndex = i;
+			max = results[i];
+		}
+	}
+	return maxIndex;
+};
+
+// Self-invoked on pageload
+const renderQuiz = (() => {
+	quiz.getMathExcercises(numberOfQuestion);
+	quiz.displayQuestion(sum, answerBox, indexBox);
+})();
+
 /**************************** Canvas functions **********************************/
+const clearCanvas = () => {
+	ctx = canvas.getContext('2d');
+	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+	clickX = new Array();
+	clickY = new Array();
+	clickD = new Array();
+};
+
 const addUserGesture = (x, y, dragging) => {
 	clickX.push(x);
 	clickY.push(y);
@@ -68,7 +103,6 @@ const addUserGesture = (x, y, dragging) => {
 
 const drawOnCanvas = () => {
 	ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
 	ctx.fillStyle = canvasBackground;
 	ctx.strokeStyle = canvasStrokeStyle;
 	ctx.lineJoin = canvasLineJoin;
@@ -89,15 +123,13 @@ const drawOnCanvas = () => {
 
 const isCanvasBlank = canvas => {
 	const context = canvas.getContext('2d');
-
 	const pixelBuffer = new Uint32Array(
 		context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
 	);
-
 	return !pixelBuffer.some(color => color !== 0);
 };
 
-/************************** Event Listeners on canvas ***************************/
+/************************** Mouse Events on Canvas ***************************/
 canvas.addEventListener('mousedown', e => {
 	const rect = canvas.getBoundingClientRect();
 	const mouseX = e.clientX - rect.left;
@@ -106,23 +138,6 @@ canvas.addEventListener('mousedown', e => {
 	addUserGesture(mouseX, mouseY);
 	drawOnCanvas();
 });
-
-canvas.addEventListener('touchstart', (e) => {
-	if (e.target === canvas) {
-		e.preventDefault();
-	}
-
-	const rect = canvas.getBoundingClientRect();
-	const touch = e.touches[0];
-
-	const mouseX = touch.clientX - rect.left;
-	const mouseY = touch.clientY - rect.top;
-
-	drawing = true;
-	addUserGesture(mouseX, mouseY);
-	drawOnCanvas();
-
-}, false);
 
 canvas.addEventListener('mousemove', e => {
 	if (drawing) {
@@ -134,14 +149,29 @@ canvas.addEventListener('mousemove', e => {
 	}
 });
 
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
+
+/************************** Touch Events on Canvas ***************************/
+canvas.addEventListener('touchstart', (e) => {
+	if (e.target === canvas) e.preventDefault();
+
+	const rect = canvas.getBoundingClientRect();
+	const touch = e.touches[0];
+	const mouseX = touch.clientX - rect.left;
+	const mouseY = touch.clientY - rect.top;
+
+	drawing = true;
+	addUserGesture(mouseX, mouseY);
+	drawOnCanvas();
+}, false);
+
 canvas.addEventListener('touchmove', (e) => {
-	if (e.target === canvas) {
-		e.preventDefault();
-	}
+	if (e.target === canvas) e.preventDefault();
+
 	if(drawing) {
 		const rect = canvas.getBoundingClientRect();
 		const touch = e.touches[0];
-
 		const mouseX = touch.clientX - rect.left;
 		const mouseY = touch.clientY - rect.top;
 
@@ -150,21 +180,13 @@ canvas.addEventListener('touchmove', (e) => {
 	}
 }, false);
 
-canvas.addEventListener('mouseup', () => drawing = false);
-
 canvas.addEventListener('touchend', (e) => {
-	if (e.target === canvas) {
-		e.preventDefault();
-	}
+	if (e.target === canvas) e.preventDefault();
 	drawing = false;
 }, false);
 
-canvas.addEventListener('mouseleave', () => drawing = false);
-
 canvas.addEventListener('touchleave', (e) => {
-	if (e.target === canvas) {
-		e.preventDefault();
-	}
+	if (e.target === canvas) e.preventDefault();
 	drawing = false;
 }, false);
 
@@ -173,73 +195,113 @@ clearButton.addEventListener('click', async (e) => {
 	e.preventDefault();
 	clearCanvas();
 	
-	if (sum.childNodes.length > 1) {
-		const answer = sum.querySelector('span').innerHTML;
-		const numbers = Array.from(answer.toString()).map(Number);
-		numbers.pop();
-		sum.querySelector('span').innerHTML = [...numbers];
+	const answer = answerBox.innerHTML;
+	const numbers = Array.from(answer.toString()).map(Number);
+	numbers.pop();
+	if (numbers.length === 0) {
+		answerBox.innerHTML = '';
+	} else {
+		answerBox.innerHTML = [...numbers];
 	}
+
+	quiz.changeUserAnswer(answerBox);
 });
 
 fillButton.addEventListener('click', async (e) => {
 	e.preventDefault();
-	let tensor = preprocessCanvas(canvas);
-	let predictions = await model.predict(tensor).data();
-	let results = Array.from(predictions);
-	
-	displayNumber(results);
+	const predictedNumber = await predictNumber();
+	await displayAnswer(predictedNumber);
+	quiz.changeUserAnswer(answerBox);
 	clearCanvas();
 });
 
-checkButton.addEventListener('click', (e) => {
+nextButton.addEventListener('click', e => {
 	e.preventDefault();
-	const answer = Number(sum.querySelector('span').innerHTML);
-	checkAnswer(answer);
+	quiz.index++;
+	if (quiz.index > 0) prevButton.removeAttribute('disabled');
+	if (quiz.index === (numberOfQuestion - 1)) {
+		nextButton.setAttribute('disabled', 'true');
+		doneButton.style.display = 'block';
+	}
+	quiz.displayQuestion(sum, answerBox, indexBox);
 });
 
-/****************************** Math functions ***********************************/
-// Show written number prediciton on chalkboard
-const displayNumber = data => {
-	let max = data[0];
-	let maxIndex = 0;
+prevButton.addEventListener('click', e => {
+	e.preventDefault();
+	if (quiz.index === numberOfQuestion - 1) nextButton.removeAttribute('disabled');
+	quiz.index--;
+	if (quiz.index < numberOfQuestion - 1) doneButton.style.display = 'none';
+	if (quiz.index === 0) prevButton.setAttribute('disabled', 'true');
+	quiz.displayQuestion(sum, answerBox, indexBox);
+});
 
-	for (let i = 1; i < data.length; i++) {
-		if (data[i] > max) {
-			maxIndex = i;
-			max = data[i];
+doneButton.addEventListener('click', e => {
+	e.preventDefault();
+	
+	let unanswered = 0;
+	quiz.questions.forEach(question => {
+		console.log(question);
+		if (question.userAnswer === undefined || question.userAnswer === '') {
+			unanswered++;
 		}
-	}
+	});
 
+	if (unanswered === 0) {
+		const final = quiz.checkAnswers();
+		createModal(done, final);
+	} else {
+		createModal(confirm, undefined, unanswered);
+	}
+});
+
+// Show written number prediciton on chalkboard
+const displayAnswer = async(answer) => {
 	if (isCanvasBlank(canvas)) return;
-
-	if (sum.childNodes.length > 1) {
-		sum.childNodes[1].innerHTML += maxIndex;
-	} else {
-		const number = document.createElement('span');
-		sum.appendChild(number);
-		number.innerHTML = maxIndex;
-	}
+	answerBox.innerHTML += answer;
 };
 
-// Get random number between 0 and 9
-const getRandomInt = (min, max) => {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min) + min);
-};
+const createModal = (type, final, unanswered) => {
+	const modal = document.createElement('div');
+	const modalContent = document.createElement('div');
+	const controls = document.createElement('div');
+	const buttonCancel = document.createElement('button');
+	const buttonConfirm = document.createElement('button');
+	const header = document.createElement('h1');
+	const message = document.createElement('p');
 
-// Return a random math excercise on chalkboard
-const getMathExcercise = (() => {
-	num1 = getRandomInt(0, 10);
-	num2 = getRandomInt(0, 10);
-	sum.innerHTML = `${num1} + ${num2} = `;
-})();
+	modal.classList.add('modal');
+	modalContent.classList.add('modal--content');
+	header.classList.add('modal--content__header');
+	message.classList.add('modal--content__message');
+	controls.classList.add('modal--content__controls');
 
-// Check if given answer is (in)correct
-const checkAnswer = (answer) => {
-	if (Number(num1 + num2) === answer) {
-		console.log(`Correct! ${num1 + num2} is the same as ${answer}`);
+	modal.appendChild(modalContent);
+	modalContent.appendChild(header);
+	modalContent.appendChild(message);
+	modalContent.appendChild(controls);
+	controls.appendChild(buttonConfirm);
+
+	modal.addEventListener('click', () => modal.remove());
+	modal.childNodes.forEach(child => child.addEventListener('click', e => e.stopPropagation()));
+
+	if (type === confirm) {
+		header.innerText = `Je hebt ${unanswered} vragen niet ingevuld`;
+		message.innerText = 'Weet je zeker dat je wilt stoppen?';
+		buttonCancel.innerText = 'Nee';
+		buttonConfirm.innerText = 'Ja';
+		controls.appendChild(buttonCancel);
+		buttonConfirm.addEventListener('click', () => {
+			modal.remove();
+			const final = quiz.checkAnswers();
+			createModal(done, final);
+		});
+		buttonCancel.addEventListener('click', () => modal.remove());
 	} else {
-		console.log(`Sorry buddy! But ${num1 + num2} is not the same as ${answer}`);
+		header.innerText = `Je hebt een ${final.mark}`;
+		message.innerText = `Je had ${final.correctAnswers} van de ${final.questionCount} goed beantwoord.`;
+		buttonConfirm.innerText = 'Opnieuw';
+		buttonConfirm.addEventListener('click', () => location.reload());
 	}
+
+	document.body.appendChild(modal);
 };
