@@ -4,6 +4,7 @@
 
 html {
   background-color: rgb(170, 239, 243);
+  overflow: hidden;
 }
 
 .chalkboard {
